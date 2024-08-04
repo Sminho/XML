@@ -338,6 +338,101 @@ https://pugixml.org/
 ### 단점
 - **기능 제한**: 기본적인 XML 처리에는 적합하지만, XSLT와 같은 고급 기능은 지원하지 않습니다.
 
+### C++에서 PugiXML을 사용하여 XML 저장 및 불러오기
+
+1. PugiXML 설치
+
+```cpp
+#include "pugixml.hpp"
+```
+2. XML 문서 생성 및 저장
+XML 문서 생성
+```cpp
+pugi::xml_document doc;
+pugi::xml_node root = doc.append_child("Root");
+
+// 자식 엘리먼트 추가
+pugi::xml_node child1 = root.append_child("Child1");
+child1.append_child(pugi::node_pcdata).set_value("Value1");
+
+pugi::xml_node child2 = root.append_child("Child2");
+child2.append_child(pugi::node_pcdata).set_value("Value2");
+
+// XML 문서를 파일로 저장
+if (!doc.save_file("example.xml")) {
+    std::cerr << "XML 문서 저장 실패" << std::endl;
+}
+```
+전체 예제 코드
+```cpp
+#include "pugixml.hpp"
+#include <iostream>
+
+int main() {
+    pugi::xml_document doc;
+    pugi::xml_node root = doc.append_child("Root");
+
+    // 자식 엘리먼트 추가
+    pugi::xml_node child1 = root.append_child("Child1");
+    child1.append_child(pugi::node_pcdata).set_value("Value1");
+
+    pugi::xml_node child2 = root.append_child("Child2");
+    child2.append_child(pugi::node_pcdata).set_value("Value2");
+
+    // XML 문서를 파일로 저장
+    if (!doc.save_file("example.xml")) {
+        std::cerr << "XML 문서 저장 실패" << std::endl;
+        return -1;
+    }
+
+    std::cout << "XML 문서가 성공적으로 저장되었습니다." << std::endl;
+    return 0;
+}
+```
+3. XML 문서 불러오기
+XML 문서 로드
+```cpp
+pugi::xml_document doc;
+pugi::xml_parse_result result = doc.load_file("example.xml");
+
+if (!result) {
+    std::cerr << "XML 문서 로드 실패: " << result.description() << std::endl;
+}
+```
+XML 데이터 접근
+```cpp
+pugi::xml_node root = doc.child("Root");
+
+for (pugi::xml_node child : root.children()) {
+    std::cout << "Node Name: " << child.name() << std::endl;
+    std::cout << "Node Value: " << child.child_value() << std::endl;
+}
+```
+전체 예제 코드
+```cpp
+#include "pugixml.hpp"
+#include <iostream>
+
+int main() {
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_file("example.xml");
+
+    if (!result) {
+        std::cerr << "XML 문서 로드 실패: " << result.description() << std::endl;
+        return -1;
+    }
+
+    pugi::xml_node root = doc.child("Root");
+
+    for (pugi::xml_node child : root.children()) {
+        std::cout << "Node Name: " << child.name() << std::endl;
+        std::cout << "Node Value: " << child.child_value() << std::endl;
+    }
+
+    return 0;
+}
+```
+
 ## 3. CMarkup
 http://www.firstobject.com/index.html
 
