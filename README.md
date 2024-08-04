@@ -450,7 +450,93 @@ http://www.firstobject.com/index.html
 - **기능 제한**: 복잡한 XML 처리에는 적합하지 않을 수 있으며, 고급 기능이 부족할 수 있습니다.
 - **상용 라이브러리**: 무료 라이브러리가 아니므로 상용 라이선스가 필요합니다.
 - **XPath 미지원**: XPath 쿼리를 지원하지 않습니다.
+C++에서 CMarkup을 사용하여 XML 저장 및 불러오기
+CMarkup은 C++에서 XML 문서를 처리하기 위한 라이브러리입니다. 이 문서에서는 CMarkup을 사용하여 XML 문서를 저장하고 불러오는 방법을 설명합니다.
 
+1. CMarkup 설치
+```cpp
+#include "Markup.h"
+```
+2. XML 문서 생성 및 저장
+XML 문서 생성
+```cpp
+CMarkup xml;
+xml.AddElem("Root");                // 루트 엘리먼트 추가
+xml.IntoElem();                     // 루트 엘리먼트로 이동
+xml.AddElem("Child1", "Value1");    // 자식 엘리먼트 추가
+xml.AddElem("Child2", "Value2");    // 자식 엘리먼트 추가
+```
+XML 문서 저장
+```cpp
+if (!xml.Save("example.xml")) {
+    std::cerr << "XML 문서 저장 실패" << std::endl;
+}
+```
+전체 예제 코드
+```cpp
+#include "Markup.h"
+#include <iostream>
+
+int main() {
+    CMarkup xml;
+    xml.AddElem("Root");                // 루트 엘리먼트 추가
+    xml.IntoElem();                     // 루트 엘리먼트로 이동
+    xml.AddElem("Child1", "Value1");    // 자식 엘리먼트 추가
+    xml.AddElem("Child2", "Value2");    // 자식 엘리먼트 추가
+
+    // XML 문서를 파일로 저장
+    if (!xml.Save("example.xml")) {
+        std::cerr << "XML 문서 저장 실패" << std::endl;
+        return -1;
+    }
+
+    std::cout << "XML 문서가 성공적으로 저장되었습니다." << std::endl;
+    return 0;
+}
+```
+3. XML 문서 불러오기
+XML 문서 로드
+```cpp
+CMarkup xml;
+if (!xml.Load("example.xml")) {
+    std::cerr << "XML 문서 로드 실패" << std::endl;
+}
+```
+XML 데이터 접근
+```cpp
+if (xml.FindElem("Root")) {
+    xml.IntoElem();  // 루트 엘리먼트로 이동
+
+    while (xml.FindElem()) {
+        std::cout << "Node Name: " << xml.GetTagName() << std::endl;
+        std::cout << "Node Value: " << xml.GetData() << std::endl;
+    }
+}
+```
+전체 예제 코드
+```cpp
+#include "Markup.h"
+#include <iostream>
+
+int main() {
+    CMarkup xml;
+    if (!xml.Load("example.xml")) {
+        std::cerr << "XML 문서 로드 실패" << std::endl;
+        return -1;
+    }
+
+    if (xml.FindElem("Root")) {
+        xml.IntoElem();  // 루트 엘리먼트로 이동
+
+        while (xml.FindElem()) {
+            std::cout << "Node Name: " << xml.GetTagName() << std::endl;
+            std::cout << "Node Value: " << xml.GetData() << std::endl;
+        }
+    }
+
+    return 0;
+}
+```
 ## 요약
 
 - **MSXML**: Windows 환경에서 강력하고 다양한 기능을 필요로 할 때 적합합니다. 하지만 플랫폼 종속적이고 COM 복잡성을 가집니다.
