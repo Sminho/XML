@@ -18,6 +18,307 @@ https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ms763742(v=v
 - **COM 복잡성**: COM 인터페이스를 사용하는 경우 XML 처리에는 과도하게 복잡성이 올라가고,
                   특히 COM 호출 오버헤드로 인해 성능이 저하될 수 있습니다.
 
+### C++에서 MSXML을 사용하여 XML 저장 및 불러오기
+
+1. 초기 설정
+먼저, MSXML 라이브러리를 사용하기 위해 필요한 초기 설정
+
+```cpp
+#include <iostream>
+#include <comdef.h>
+#include <msxml6.h>
+
+// COM 라이브러리 초기화
+if (FAILED(CoInitialize(NULL))) {
+    std::cerr << "COM 라이브러리 초기화 실패" << std::endl;
+    return -1;
+}
+
+// COM 라이브러리 해제
+CoUninitialize();
+```
+2. XML 문서 생성 및 저장
+XML 문서를 생성하고 파일로 저장하는 함수입니다.
+
+XML 문서 생성
+```cpp
+HRESULT CreateXMLDocument(IXMLDOMDocument** ppDoc) {
+    HRESULT hr = CoCreateInstance(CLSID_DOMDocument60, NULL, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)ppDoc);
+    if (FAILED(hr)) {
+        std::cerr << "XML 문서 생성 실패" << std::endl;
+    }
+    return hr;
+}
+```
+루트 엘리먼트 생성 및 추가
+```cpp
+HRESULT CreateRootElement(IXMLDOMDocument* pDoc, IXMLDOMElement** ppRoot) {
+    HRESULT hr = pDoc->createElement(L"Root", ppRoot);
+    if (SUCCEEDED(hr)) {
+        pDoc->appendChild(*ppRoot, NULL);
+    } else {
+        std::cerr << "루트 엘리먼트 생성 실패" << std::endl;
+    }
+    return hr;
+}
+```
+자식 엘리먼트 생성 및 추가
+```cpp
+HRESULT AddChildElement(IXMLDOMDocument* pDoc, IXMLDOMElement* pParent, const wchar_t* tagName, const wchar_t* text) {
+    IXMLDOMElement* pChild = NULL;
+    HRESULT hr = pDoc->createElement(tagName, &pChild);
+    if (SUCCEEDED(hr)) {
+        IXMLDOMText* pText = NULL;
+        hr = pDoc->createTextNode(text, &pText);
+        if (SUCCEEDED(hr)) {
+            pChild->appendChild(pText, NULL);
+            pParent->appendChild(pChild, NULL);
+            pText->Release();
+        }
+        pChild->Release();
+    }
+    return hr;
+}
+```
+XML 문서 저장
+```cpp
+HRESULT SaveXMLDocument(IXMLDOMDocument* pDoc, const wchar_t* filePath) {
+    VARIANT varFileName;
+    VariantInit(&varFileName);
+    varFileName.vt = VT_BSTR;
+    varFileName.bstrVal = SysAllocString(filePath);
+
+    HRESULT hr = pDoc->save(varFileName);
+    if (FAILED(hr)) {
+        std::cerr << "XML 문서 저장 실패" << std::endl;
+    }
+
+    VariantClear(&varFileName);
+    return hr;
+}
+```
+전체 예제 코드
+```cpp
+#include <iostream>
+#include <comdef.h>
+#include <msxml6.h>
+
+HRESULT CreateXMLDocument(IXMLDOMDocument** ppDoc);
+HRESULT CreateRootElement(IXMLDOMDocument* pDoc, IXMLDOMElement** ppRoot);
+HRESULT AddChildElement(IXMLDOMDocument* pDoc, IXMLDOMElement* pParent, const wchar_t* tagName, const wchar_t* text);
+HRESULT SaveXMLDocument(IXMLDOMDocument* pDoc, const wchar_t* filePath);
+
+int main() {
+    if (FAILED(CoInitialize(NULL))) {
+        std::cerr << "COM 라이브러리 초기화 실패" << std::endl;
+        return -1;
+    }
+
+    IXMLDOMDocument* pDoc = NULL;
+    if (SUCCEEDED(CreateXMLDocument(&pDoc))) {
+        IXMLDOMElement* pRoot = NULL;
+        if (SUCCEEDED(CreateRootElement(pDoc, &pRoot))) {
+            AddChildElement(pDoc, pRoot, L"Child1", L"Value1");
+            AddChildElement(pDoc, pRoot, L"Child2", L"Value2");
+
+            SaveXMLDocument(pDoc, L"example.xml");
+            pRoot->Release();
+        }
+        pDoc->Release();
+    }
+
+    CoUninitialize();
+    return 0;
+}
+
+HRESULT CreateXMLDocument(IXMLDOMDocument** ppDoc) {
+    HRESULT hr = CoCreateInstance(CLSID_DOMDocument60, NULL, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)ppDoc);
+    if (FAILED(hr)) {
+        std::cerr << "XML 문서 생성 실패" << std::endl;
+    }
+    return hr;
+}
+
+HRESULT CreateRootElement(IXMLDOMDocument* pDoc, IXMLDOMElement** ppRoot) {
+    HRESULT hr = pDoc->createElement(L"Root", ppRoot);
+    if (SUCCEEDED(hr)) {
+        pDoc->appendChild(*ppRoot, NULL);
+    } else {
+        std::cerr << "루트 엘리먼트 생성 실패" << std::endl;
+    }
+    return hr;
+}
+
+HRESULT AddChildElement(IXMLDOMDocument* pDoc, IXMLDOMElement* pParent, const wchar_t* tagName, const wchar_t* text) {
+    IXMLDOMElement* pChild = NULL;
+    HRESULT hr = pDoc->createElement(tagName, &pChild);
+    if (SUCCEEDED(hr)) {
+        IXMLDOMText* pText = NULL;
+        hr = pDoc->createTextNode(text, &pText);
+        if (SUCCEEDED(hr)) {
+            pChild->appendChild(pText, NULL);
+            pParent->appendChild(pChild, NULL);
+            pText->Release();
+        }
+        pChild->Release();
+    }
+    return hr;
+}
+
+HRESULT SaveXMLDocument(IXMLDOMDocument* pDoc, const wchar_t* filePath) {
+    VARIANT varFileName;
+    VariantInit(&varFileName);
+    varFileName.vt = VT_BSTR;
+    varFileName.bstrVal = SysAllocString(filePath);
+
+    HRESULT hr = pDoc->save(varFileName);
+    if (FAILED(hr)) {
+        std::cerr << "XML 문서 저장 실패" << std::endl;
+    }
+
+    VariantClear(&varFileName);
+    return hr;
+}
+```
+3. XML 문서 불러오기
+저장된 XML 문서를 불러오는 함수입니다.
+
+XML 문서 로드
+```cpp
+HRESULT LoadXMLDocument(IXMLDOMDocument* pDoc, const wchar_t* filePath) {
+    VARIANT varFileName;
+    VariantInit(&varFileName);
+    varFileName.vt = VT_BSTR;
+    varFileName.bstrVal = SysAllocString(filePath);
+
+    VARIANT_BOOL loadSuccess;
+    HRESULT hr = pDoc->load(varFileName, &loadSuccess);
+    if (FAILED(hr) || loadSuccess == VARIANT_FALSE) {
+        std::cerr << "XML 문서 로드 실패" << std::endl;
+    }
+
+    VariantClear(&varFileName);
+    return hr;
+}
+```
+XML 데이터 접근
+```cpp
+void PrintXMLDocument(IXMLDOMDocument* pDoc) {
+    IXMLDOMElement* pRoot = NULL;
+    pDoc->get_documentElement(&pRoot);
+    if (pRoot) {
+        IXMLDOMNodeList* pChildNodes = NULL;
+        pRoot->get_childNodes(&pChildNodes);
+        if (pChildNodes) {
+            long length;
+            pChildNodes->get_length(&length);
+            for (long i = 0; i < length; ++i) {
+                IXMLDOMNode* pNode = NULL;
+                pChildNodes->get_item(i, &pNode);
+                if (pNode) {
+                    BSTR nodeName;
+                    pNode->get_nodeName(&nodeName);
+                    std::wcout << L"Node Name: " << nodeName << std::endl;
+                    SysFreeString(nodeName);
+
+                    BSTR nodeText;
+                    pNode->get_text(&nodeText);
+                    std::wcout << L"Node Text: " << nodeText << std::endl;
+                    SysFreeString(nodeText);
+
+                    pNode->Release();
+                }
+            }
+            pChildNodes->Release();
+        }
+        pRoot->Release();
+    }
+}
+```
+전체 예제 코드
+```cpp
+#include <iostream>
+#include <comdef.h>
+#include <msxml6.h>
+
+HRESULT CreateXMLDocument(IXMLDOMDocument** ppDoc);
+HRESULT LoadXMLDocument(IXMLDOMDocument* pDoc, const wchar_t* filePath);
+void PrintXMLDocument(IXMLDOMDocument* pDoc);
+
+int main() {
+    if (FAILED(CoInitialize(NULL))) {
+        std::cerr << "COM 라이브러리 초기화 실패" << std::endl;
+        return -1;
+    }
+
+    IXMLDOMDocument* pDoc = NULL;
+    if (SUCCEEDED(CreateXMLDocument(&pDoc))) {
+        if (SUCCEEDED(LoadXMLDocument(pDoc, L"example.xml"))) {
+            PrintXMLDocument(pDoc);
+        }
+        pDoc->Release();
+    }
+
+    CoUninitialize();
+    return 0;
+}
+
+HRESULT CreateXMLDocument(IXMLDOMDocument** ppDoc) {
+    HRESULT hr = CoCreateInstance(CLSID_DOMDocument60, NULL, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)ppDoc);
+    if (FAILED(hr)) {
+        std::cerr << "XML 문서 생성 실패" << std::endl;
+    }
+    return hr;
+}
+
+HRESULT LoadXMLDocument(IXMLDOMDocument* pDoc, const wchar_t* filePath) {
+    VARIANT varFileName;
+    VariantInit(&varFileName);
+    varFileName.vt = VT_BSTR;
+    varFileName.bstrVal = SysAllocString(filePath);
+
+    VARIANT_BOOL loadSuccess;
+    HRESULT hr = pDoc->load(varFileName, &loadSuccess);
+    if (FAILED(hr) || loadSuccess == VARIANT_FALSE) {
+        std::cerr << "XML 문서 로드 실패" << std::endl;
+    }
+
+    VariantClear(&varFileName);
+    return hr;
+}
+
+void PrintXMLDocument(IXMLDOMDocument* pDoc) {
+    IXMLDOMElement* pRoot = NULL;
+    pDoc->get_documentElement(&pRoot);
+    if (pRoot) {
+        IXMLDOMNodeList* pChildNodes = NULL;
+        pRoot->get_childNodes(&pChildNodes);
+        if (pChildNodes) {
+            long length;
+            pChildNodes->get_length(&length);
+            for (long i = 0; i < length; ++i) {
+                IXMLDOMNode* pNode = NULL;
+                pChildNodes->get_item(i, &pNode);
+                if (pNode) {
+                    BSTR nodeName;
+                    pNode->get_nodeName(&nodeName);
+                    std::wcout << L"Node Name: " << nodeName << std::endl;
+                    SysFreeString(nodeName);
+
+                    BSTR nodeText;
+                    pNode->get_text(&nodeText);
+                    std::wcout << L"Node Text: " << nodeText << std::endl;
+                    SysFreeString(nodeText);
+
+                    pNode->Release();
+                }
+            }
+            pChildNodes->Release();
+        }
+        pRoot->Release();
+    }
+}
+```
 ## 2. PugiXML
 https://pugixml.org/
 
