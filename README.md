@@ -1,6 +1,7 @@
 # C++에서 XML 파서 비교: MSXML, PugiXML, CMarkup
 
 ## 1. MSXML (Microsoft XML Core Services)
+https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ms763742(v=vs.85)#in-this-documentation
 
 ### 특징
 - **Microsoft 제공**: MSXML은 Microsoft에서 제공하는 XML 파서로, Windows 운영 체제와 통합되어있습니다.
@@ -18,6 +19,7 @@
                   특히 COM 호출 오버헤드로 인해 성능이 저하될 수 있습니다.
 
 ## 2. PugiXML
+https://pugixml.org/
 
 ### 특징
 - **경량화**: PugiXML은 경량화된 XML 파서로, 성능과 사용의 용이성에 중점을 두고 설계되었습니다.
@@ -36,6 +38,7 @@
 - **기능 제한**: 기본적인 XML 처리에는 적합하지만, XSLT와 같은 고급 기능은 지원하지 않습니다.
 
 ## 3. CMarkup
+http://www.firstobject.com/index.html
 
 ### 특징
 - **경량화**: CMarkup도 경량화된 XML 파서로, 간단한 XML 처리를 목표로 설계되었습니다.
