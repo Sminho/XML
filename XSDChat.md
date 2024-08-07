@@ -6,14 +6,17 @@
 XML 데이터
 xml
 코드 복사
+```
 <root>
     <element>1</element>
     <element>2</element>
     <element>3</element>
 </root>
+```
 XSD 스키마
 xml
 코드 복사
+```
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
     <xs:element name="root">
@@ -24,9 +27,11 @@ xml
         </xs:complexType>
     </xs:element>
 </xs:schema>
+```
 C++ 코드
 cpp
 코드 복사
+```
 #include <msxml6.h>
 #include <iostream>
 #include <comutil.h> // For _bstr_t
@@ -103,6 +108,7 @@ int main() {
     createAndValidateXMLWithXSD();
     return 0;
 }
+```
 설명
 COM 초기화: CoInitialize를 호출하여 COM 라이브러리를 초기화합니다.
 MSXML DOM 객체 생성: CoCreateInstance를 사용하여 MSXML DOM 객체를 생성합니다.
@@ -119,14 +125,17 @@ MSXML4를 사용하여 주어진 XML 데이터를 생성하고, 이를 XSD로 �
 XML 데이터
 xml
 코드 복사
+```
 <root>
     <element>1</element>
     <element>2</element>
     <element>3</element>
 </root>
+```
 XSD 스키마
 xml
 코드 복사
+```
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
     <xs:element name="root">
@@ -137,9 +146,11 @@ xml
         </xs:complexType>
     </xs:element>
 </xs:schema>
+```
 C++ 코드
 cpp
 코드 복사
+```
 #include <msxml2.h>
 #include <iostream>
 #include <comutil.h> // For _bstr_t
@@ -215,6 +226,7 @@ int main() {
     createAndValidateXMLWithXSD();
     return 0;
 }
+```
 설명
 COM 초기화: CoInitialize를 호출하여 COM 라이브러리를 초기화합니다.
 MSXML DOM 객체 생성: CoCreateInstance를 사용하여 MSXML4 DOM 객체를 생성합니다.
